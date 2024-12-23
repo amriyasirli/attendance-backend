@@ -7,4 +7,8 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 
+// STUDENTS API
 $routes->resource('students');
+
+// AUTHENTICATION
+service('auth')->routes($routes);
