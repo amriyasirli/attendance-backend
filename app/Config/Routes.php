@@ -1,5 +1,6 @@
 <?php
 
+use App\Controllers\Api\AuthController;
 use CodeIgniter\Router\RouteCollection;
 use CodeIgniter\Shield\Entities\AccessToken;
 
@@ -14,8 +15,13 @@ $routes->resource('students');
 // AUTHENTICATION
 service('auth')->routes($routes);
 
-$routes->get('access/token', static function () {
-    $token = auth()->user()->accessTokens();
+// API Routes
+$routes->post("/api/register", [AuthController::class, "register"]);
+$routes->post("/api/login", [AuthController::class, "login"]);
 
-    dd($token);
+// Protected API Routes
+$routes->group("api", ["namespace" => "App\Controllers\Api", "filter" => "shield_auth"], function ($routes) {
+
+    $routes->get("profile", [AuthController::class, "profile"]);
+    $routes->get("logout", [AuthController::class, "logout"]);
 });

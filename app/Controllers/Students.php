@@ -28,7 +28,7 @@ class Students extends ResourceController
         $students = $this->Model->findAll(20);
 
         $data = [
-            'status' => 200,
+            'status' => true,
             'message' => 'Data retrieved successfully!',
             'data' => $students ?? [],
         ];
@@ -48,7 +48,7 @@ class Students extends ResourceController
 
         if ($student) {
             $data = [
-                'status' => 200,
+                'status' => true,
                 'message' => 'Data retrieved successfully!',
                 'data' => $student ?? [],
             ];
@@ -57,7 +57,7 @@ class Students extends ResourceController
         }
 
         $data = [
-            'status' => 404,
+            'status' => false,
             'message' => 'Data not found!',
             'data' => [],
         ];
@@ -88,7 +88,7 @@ class Students extends ResourceController
 
         if (!$this->Model->insert($data)) {
             return $this->respond([
-                'status' => 400,
+                'status' => false,
                 'message' => 'Validation failed',
                 'errors' => $this->Model->errors(),
             ], 400);
@@ -97,7 +97,7 @@ class Students extends ResourceController
         $this->Model->insert($data);
 
         return $this->respondCreated([
-            'status' => 201,
+            'status' => true,
             'message' => 'Student created successfully',
         ]);
     }
@@ -130,7 +130,7 @@ class Students extends ResourceController
 
         if (!$existingStudent) {
             return $this->respond([
-                'status' => 404,
+                'status' => false,
                 'message' => 'Data not found!'
             ], 404);
         }
@@ -147,7 +147,7 @@ class Students extends ResourceController
 
         if (!$this->Model->update($id, $data)) {
             return $this->respond([
-                'status' => 400,
+                'status' => false,
                 'message' => 'Validation failed!',
                 'errors' => $this->Model->errors(),
             ], 400);
@@ -156,7 +156,7 @@ class Students extends ResourceController
         $this->Model->update($id, $data);
 
         return $this->respond([
-            'status' => 200,
+            'status' => true,
             'message' => 'Student updated successfully!',
             'data' => $data
         ], 200);
@@ -176,7 +176,7 @@ class Students extends ResourceController
 
         if (!$data) {
             return $this->respond([
-                'status' => 404,
+                'status' => false,
                 'message' => 'Data not found'
             ], 404);
         }
@@ -184,13 +184,13 @@ class Students extends ResourceController
         // Hapus data
         if ($this->Model->delete($id)) {
             return $this->respondDeleted([
-                'status' => 200,
+                'status' => true,
                 'message' => 'Data deleted successfully'
             ]);
         }
 
         return $this->respond([
-            'status' => 500,
+            'status' => false,
             'message' => 'Failed to delete data'
         ], 500);
     }
