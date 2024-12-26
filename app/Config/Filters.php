@@ -43,7 +43,7 @@ class Filters extends BaseFilters
         'tokens'        => TokenAuth::class,
         'hmac'          => HmacAuth::class,
         'shield_auth'   => ShieldAuthFilter::class,
-        'cors_filter'   => CorsFilter::class,
+        // 'cors_filter'   => CorsFilter::class,
     ];
 
     /**
@@ -84,7 +84,7 @@ class Filters extends BaseFilters
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
-            'cors_filter'
+            'cors'
         ],
         'after' => [
             // 'honeypot',
