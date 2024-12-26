@@ -2,6 +2,7 @@
 
 namespace Config;
 
+use App\Filters\CorsFilter;
 use App\Filters\ShieldAuthFilter;
 use CodeIgniter\Config\Filters as BaseFilters;
 use CodeIgniter\Filters\Cors;
@@ -42,6 +43,7 @@ class Filters extends BaseFilters
         'tokens'        => TokenAuth::class,
         'hmac'          => HmacAuth::class,
         'shield_auth'   => ShieldAuthFilter::class,
+        'cors_filter'   => CorsFilter::class,
     ];
 
     /**
@@ -77,11 +79,12 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
-            'session'       => ['except' => ['api/*', 'login*', 'register', 'auth/a/*', 'logout']],
+            // 'session'       => ['except' => ['api/*', 'login*', 'register', 'auth/a/*', 'logout']],
             'shield_auth'   => ['except' => ['api/login', 'api/register']],
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
+            'cors_filter'
         ],
         'after' => [
             // 'honeypot',

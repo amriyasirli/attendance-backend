@@ -25,14 +25,12 @@ class Students extends ResourceController
      */
     public function index()
     {
-        $students = $this->Model->findAll(20);
+        $data = $this->Model->select('students.*, class_name')
+            ->join('classes', 'classes.id=students.class_id')
+            ->findAll(50);
 
-        $data = [
-            'status' => true,
-            'message' => 'Data retrieved successfully!',
-            'data' => $students ?? [],
-        ];
-        return $this->respond($data, 200);
+        $msg = 'Data retrieved successfully!';
+        return $this->respond($data, 200, $msg);
     }
 
     /**
@@ -44,25 +42,15 @@ class Students extends ResourceController
      */
     public function show($id = null)
     {
-        $student = $this->Model->find($id);
+        $data = $this->Model->find($id);
 
-        if ($student) {
-            $data = [
-                'status' => true,
-                'message' => 'Data retrieved successfully!',
-                'data' => $student ?? [],
-            ];
-
-            return $this->respond($data, 200);
+        if ($data) {
+            $msg = 'Data retrieved successfully!';
+            return $this->respond($data, 200, $msg);
         }
 
-        $data = [
-            'status' => false,
-            'message' => 'Data not found!',
-            'data' => [],
-        ];
-
-        return $this->respond($data, 404);
+        $msg = 'Data not found!';
+        return $this->failNotFound($msg);
     }
 
     /**
@@ -97,33 +85,17 @@ class Students extends ResourceController
         ];
 
         if (!$student) {
-            return $this->respond([
-                'status' => false,
-                'message' => 'Siswa tidak ditemukan.'
-            ], 404);
+            $msg = 'Data not found!';
+            return $this->failNotFound($msg);
         }
 
         // Update data siswa
         if ($this->Model->update($id, $data)) {
-            return $this->respond([
-                'status' => true,
-                'message' => 'RFID card berhasil diperbarui.',
-                'data' => [
-                    'id' => $student['id'],
-                    'nis' => $student['nis'],
-                    'nisn' => $student['nisn'],
-                    'name' => $student['name'],
-                    'gender' => $student['gender'],
-                    'rfid_card_id' => $rfid_card_id
-                ]
-            ], 200);
+            $msg = 'RFID card berhasil diperbarui!';
+            return $this->respondCreated($msg);
         }
 
-        return $this->respond([
-            'status' => false,
-            'message' => 'Validation failed!',
-            'errors' => $this->Model->errors(),
-        ], 400);
+        return $this->failValidationErrors($this->Model->errors());
     }
 
     /**
@@ -137,20 +109,17 @@ class Students extends ResourceController
 
         // dd($data);
 
-        if (!$this->Model->insert($data)) {
-            return $this->respond([
-                'status' => false,
-                'message' => 'Validation failed',
-                'errors' => $this->Model->errors(),
-            ], 400);
+        if ($this->Model->insert($data)) {
+            return $this->failValidationErrors($this->Model->errors());
         }
 
-        $this->Model->insert($data);
+        if ($this->Model->insert($data)) {
+            $msg = 'Student created successfully!';
+            return $this->respondCreated($msg);
+        }
 
-        return $this->respondCreated([
-            'status' => true,
-            'message' => 'Student created successfully',
-        ]);
+        $msg = 'Something Wrong!';
+        return $this->failServerError('Internal Server Error!', 500, $msg);
     }
 
     /**
@@ -180,10 +149,8 @@ class Students extends ResourceController
         $existingStudent = $this->Model->find($id);
 
         if (!$existingStudent) {
-            return $this->respond([
-                'status' => false,
-                'message' => 'Data not found!'
-            ], 404);
+            $msg = 'Data not found!';
+            return $this->failNotFound($msg);
         }
 
         // Update aturan validasi untuk mengabaikan nilai unik dari record yang sedang diupdate
@@ -197,18 +164,11 @@ class Students extends ResourceController
         ]);
 
         if ($this->Model->update($id, $data)) {
-            return $this->respond([
-                'status' => true,
-                'message' => 'Student updated successfully!',
-                'data' => $data
-            ], 200);
+            $msg = 'Student updated successfully!';
+            return $this->respondCreated($data, $msg);
         }
 
-        return $this->respond([
-            'status' => false,
-            'message' => 'Validation failed!',
-            'errors' => $this->Model->errors(),
-        ], 400);
+        return $this->failValidationErrors($this->Model->errors());
     }
 
     /**
@@ -224,23 +184,18 @@ class Students extends ResourceController
         $data = $this->Model->find($id);
 
         if (!$data) {
-            return $this->respond([
-                'status' => false,
-                'message' => 'Data not found'
-            ], 404);
+            $msg = 'Data not found!';
+            return $this->failNotFound($msg);
         }
+
 
         // Hapus data
         if ($this->Model->delete($id)) {
-            return $this->respondDeleted([
-                'status' => true,
-                'message' => 'Data deleted successfully'
-            ]);
+            $msg = 'Data deleted successfully!';
+            return $this->respondDeleted($data, $msg);
         }
 
-        return $this->respond([
-            'status' => false,
-            'message' => 'Failed to delete data'
-        ], 500);
+        $msg = 'Something Wrong!';
+        return $this->failServerError('Internal Server Error!', 500, $msg);
     }
 }

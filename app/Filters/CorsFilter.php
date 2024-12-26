@@ -5,9 +5,8 @@ namespace App\Filters;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
-class ShieldAuthFilter implements FilterInterface
+class CorsFilter implements FilterInterface
 {
     /**
      * Do whatever processing this filter needs to do.
@@ -26,15 +25,10 @@ class ShieldAuthFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        // $request = \Config\Services::request();
-        // dd($request->getIPAddress());
-        if (!auth("tokens")->loggedIn()) {
-
-            return Services::response()->setStatusCode(400)->setJSON([
-                "status" => false,
-                "message" => "Unauthorized Access"
-            ]);
-        }
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With");
+        // return $request;
     }
 
     /**

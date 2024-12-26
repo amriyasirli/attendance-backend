@@ -14,7 +14,7 @@ class Classes extends Seeder
         foreach (['VII', 'VIII', 'IX'] as $grade) {
             for ($i = 1; $i <= 9; $i++) {
                 $data[] = [
-                    'name'       => "$grade.$i",
+                    'class_name'       => "$grade.$i",
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s'),
                 ];
