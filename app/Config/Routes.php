@@ -1,8 +1,8 @@
 <?php
 
 use App\Controllers\Api\AuthController;
+use App\Controllers\Students;
 use CodeIgniter\Router\RouteCollection;
-use CodeIgniter\Shield\Entities\AccessToken;
 
 /**
  * @var RouteCollection $routes
@@ -11,6 +11,7 @@ $routes->get('/', 'Home::index');
 
 // STUDENTS API
 $routes->resource('students');
+$routes->put('api/students/update-rfid/(:num)', [Students::class, "updateRfid/$1"]);
 
 // AUTHENTICATION
 service('auth')->routes($routes);

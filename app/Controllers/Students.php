@@ -70,9 +70,60 @@ class Students extends ResourceController
      *
      * @return ResponseInterface
      */
-    public function new()
+    public function updateRfid($id = null)
     {
-        //
+
+        // Ambil data dari request (JSON body)
+        $rfid_card_id = $this->request->getVar('rfid_card_id');
+
+        // Update aturan validasi untuk mengabaikan nilai unik dari record yang sedang diupdate
+        $this->Model->setValidationRules([
+            'rfid_card_id' => [
+                "rules" => "required|numeric|min_length[8]|max_length[10]|is_unique[students.rfid_card_id,id,{$id}]",
+                "errors" => [
+                    'required' => 'RFID card wajib diisi.',
+                    'numeric' => 'RFID card harus berupa angka.',
+                    'min_length' => 'RFID card tidak boleh lebih dari 8 karakter.',
+                    'max_length' => 'RFID card tidak boleh lebih dari 10 karakter.',
+                    'is_unique' => 'RFID card sudah digunakan oleh siswa lain.'
+                ]
+            ],
+        ]);
+
+        // Cek apakah siswa dengan ID tersebut ada
+        $student = $this->Model->find($id);
+        $data = [
+            'rfid_card_id' => $rfid_card_id,
+        ];
+
+        if (!$student) {
+            return $this->respond([
+                'status' => false,
+                'message' => 'Siswa tidak ditemukan.'
+            ], 404);
+        }
+
+        // Update data siswa
+        if ($this->Model->update($id, $data)) {
+            return $this->respond([
+                'status' => true,
+                'message' => 'RFID card berhasil diperbarui.',
+                'data' => [
+                    'id' => $student['id'],
+                    'nis' => $student['nis'],
+                    'nisn' => $student['nisn'],
+                    'name' => $student['name'],
+                    'gender' => $student['gender'],
+                    'rfid_card_id' => $rfid_card_id
+                ]
+            ], 200);
+        }
+
+        return $this->respond([
+            'status' => false,
+            'message' => 'Validation failed!',
+            'errors' => $this->Model->errors(),
+        ], 400);
     }
 
     /**
@@ -145,21 +196,19 @@ class Students extends ResourceController
             'rfid_card_id' => "permit_empty|numeric|max_length[10]|is_unique[students.rfid_card_id,id,{$id}]",
         ]);
 
-        if (!$this->Model->update($id, $data)) {
+        if ($this->Model->update($id, $data)) {
             return $this->respond([
-                'status' => false,
-                'message' => 'Validation failed!',
-                'errors' => $this->Model->errors(),
-            ], 400);
+                'status' => true,
+                'message' => 'Student updated successfully!',
+                'data' => $data
+            ], 200);
         }
 
-        $this->Model->update($id, $data);
-
         return $this->respond([
-            'status' => true,
-            'message' => 'Student updated successfully!',
-            'data' => $data
-        ], 200);
+            'status' => false,
+            'message' => 'Validation failed!',
+            'errors' => $this->Model->errors(),
+        ], 400);
     }
 
     /**
