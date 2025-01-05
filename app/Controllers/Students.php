@@ -27,7 +27,7 @@ class Students extends ResourceController
     {
         $data = $this->Model->select('students.*, class_name')
             ->join('classes', 'classes.id=students.class_id')
-            ->findAll(50);
+            ->findAll();
 
         $msg = 'Data retrieved successfully!';
         return $this->respond($data, 200, $msg);
@@ -40,9 +40,9 @@ class Students extends ResourceController
      *
      * @return ResponseInterface
      */
-    public function show($id = null)
+    public function show($nisn = null)
     {
-        $data = $this->Model->find($id);
+        $data = $this->Model->select('students.*, class_name')->join('classes', 'classes.id=students.class_id')->where('nisn', $nisn)->first();
 
         if ($data) {
             $msg = 'Data retrieved successfully!';
@@ -60,43 +60,50 @@ class Students extends ResourceController
      */
     public function updateRfid($id = null)
     {
-
         // Ambil data dari request (JSON body)
         $rfid_card_id = $this->request->getVar('rfid_card_id');
 
-        // Update aturan validasi untuk mengabaikan nilai unik dari record yang sedang diupdate
-        $this->Model->setValidationRules([
+        // Aturan validasi
+        $validationRules = [
             'rfid_card_id' => [
-                "rules" => "required|numeric|min_length[8]|max_length[10]|is_unique[students.rfid_card_id,id,{$id}]",
-                "errors" => [
-                    'required' => 'RFID card wajib diisi.',
-                    'numeric' => 'RFID card harus berupa angka.',
-                    'min_length' => 'RFID card tidak boleh lebih dari 8 karakter.',
-                    'max_length' => 'RFID card tidak boleh lebih dari 10 karakter.',
-                    'is_unique' => 'RFID card sudah digunakan oleh siswa lain.'
+                'rules' => "required|numeric|min_length[8]|max_length[10]|is_unique[students.rfid_card_id,id,{$id}]",
+                'errors' => [
+                    'required'    => 'RFID Card harus diisi.',
+                    'numeric'     => 'RFID Card hanya berisi angka.',
+                    'min_length'  => 'RFID Card minimal 8 karakter.',
+                    'max_length'  => 'RFID Card maksimal 10 karakter.',
+                    'is_unique'   => 'RFID Card sudah terdaftar.',
                 ]
-            ],
-        ]);
+            ]
+        ];
+
+        // Validasi input
+        if (!$this->validate($validationRules)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
 
         // Cek apakah siswa dengan ID tersebut ada
         $student = $this->Model->find($id);
+        if (!$student) {
+            return $this->failNotFound('Data siswa tidak ditemukan!');
+        }
+
+        // Data untuk diupdate
         $data = [
             'rfid_card_id' => $rfid_card_id,
         ];
 
-        if (!$student) {
-            $msg = 'Data not found!';
-            return $this->failNotFound($msg);
-        }
-
         // Update data siswa
         if ($this->Model->update($id, $data)) {
-            $msg = 'RFID card berhasil diperbarui!';
-            return $this->respondCreated($msg);
+            return $this->respond([
+                'status'  => 200,
+                'message' => 'RFID card berhasil diperbarui!',
+            ]);
         }
 
-        return $this->failValidationErrors($this->Model->errors());
+        return $this->fail('Terjadi kesalahan.');
     }
+
 
     /**
      * Create a new resource object, from "posted" parameters.

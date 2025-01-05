@@ -22,11 +22,8 @@ class AuthController extends ResourceController
 
         if (!$this->validate($this->validationCheck())) {
 
-            return $this->respond([
-                "status" => false,
-                "message" => "Registration Failed due to invalid entries",
-                "errors" => $this->validator->getErrors()
-            ], 400);
+            $msg = $this->validator->getErrors();
+            return $this->fail($msg, 400);
         }
 
         $modelObject = new CustomUserModel();
@@ -39,16 +36,12 @@ class AuthController extends ResourceController
             // Add to Other group
             $user->addGroup('user');
 
-            return $this->respondCreated([
-                "status" => true,
-                "message" => "User Registered Successfully",
-            ], 201);
+            $msg = 'User Registered Successfully';
+            return $this->respondCreated($msg);
         }
 
-        return $this->respond([
-            "status" => false,
-            "message" => "Failed to Create User",
-        ], 500);
+        $msg = 'Failed to Create User';
+        return $this->failServerError($msg, 500);
     }
 
     public function login()
@@ -60,11 +53,8 @@ class AuthController extends ResourceController
 
         if (!$this->validate($validationRules)) {
 
-            return $this->respond([
-                "status" => false,
-                "message" => "Login Failed",
-                "errors" => $this->validator->getErrors()
-            ], 400);
+            $msg = $this->validator->getErrors();
+            return $this->fail($msg, 400);
         }
 
         // Check User Details
@@ -84,10 +74,8 @@ class AuthController extends ResourceController
 
             if (!$loginAttempt->isOK()) {
 
-                return $this->respond([
-                    "status" => false,
-                    "message" => "Login Failed"
-                ], 400);
+                $msg = 'Login gagal!';
+                return $this->fail($msg, 400, null, 'Login gagal');
             } else {
 
                 $userId = auth()->user()->id;
@@ -100,18 +88,17 @@ class AuthController extends ResourceController
 
                 $raw_token = $tokenInfo->raw_token;
 
-                return $this->respond([
-                    "status" => true,
-                    "message" => "User logged in",
-                    "token" => $raw_token
-                ], 200);
+                $data = [
+                    'token' => $raw_token,
+                    'user' => $userInfo,
+                ];
+
+                $msg = 'User logged in!';
+                return $this->respond($data, 200, $msg);
             }
         } catch (Exception $ex) {
-
-            return $this->respond([
-                "status" => false,
-                "message" => $ex->getMessage()
-            ], 500);
+            $msg = $ex->getMessage();
+            return $this->failServerError($msg, 500);
         }
     }
 
@@ -120,11 +107,8 @@ class AuthController extends ResourceController
 
         $userData = auth("tokens")->user();
 
-        return $this->respond([
-            "status" => true,
-            "message" => "Profile information",
-            "data" => $userData
-        ], 200);
+        $msg = 'Profile information';
+        return $this->respond($userData, 200, $msg);
     }
 
     public function logout()
@@ -133,11 +117,12 @@ class AuthController extends ResourceController
         auth()->logout();
 
         auth()->user()->revokeAllAccessTokens();
-
-        return $this->respond([
+        $data = [
             "status" => true,
             "message" => "User logged out"
-        ], 200);
+        ];
+        $msg = 'User logged out!';
+        return $this->respond($data, 200, $msg);
     }
 
     private function validationCheck()

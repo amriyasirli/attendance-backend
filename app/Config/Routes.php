@@ -1,5 +1,6 @@
 <?php
 
+use App\Controllers\Api\AttendanceRecordsController;
 use App\Controllers\Api\AuthController;
 use App\Controllers\Students;
 use CodeIgniter\Router\RouteCollection;
@@ -11,7 +12,9 @@ $routes->get('/', 'Home::index');
 
 // STUDENTS API
 $routes->resource('students');
-$routes->put('api/students/update-rfid/(:num)', [Students::class, "updateRfid/$1"]);
+$routes->resource('attendancerecords', ['controller' => 'Api\AttendanceRecordsController']);
+// $routes->get('api/attendancerecords', [AttendanceRecordsController::class, "index"]);
+$routes->patch('api/students/update-rfid/(:num)', [Students::class, "updateRfid/$1"]);
 
 // AUTHENTICATION
 service('auth')->routes($routes);
