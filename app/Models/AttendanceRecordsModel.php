@@ -19,7 +19,7 @@ class AttendanceRecordsModel extends Model
         'check_out_time',
         'status',
         'description',
-        'user_id'
+        'officer_id'
     ];
 
     protected bool $allowEmptyInserts = false;
@@ -39,7 +39,7 @@ class AttendanceRecordsModel extends Model
     protected $validationRules      = [
         'student_id' => 'required|numeric',
         'status' => 'required|in_list[present,absent,late,sick]',
-        'user_id' => 'required|numeric'
+        'officer_id' => 'required|numeric'
     ];
     protected $validationMessages   = [
         'student_id' => [
@@ -50,7 +50,7 @@ class AttendanceRecordsModel extends Model
             'required' => 'Please enter status',
             'in_list' => 'Data status tidak valid',
         ],
-        'user_id' => [
+        'officer_id' => [
             'required' => 'Please enter Officer',
             'numeric' => 'User ID not is Numeric!',
         ]
